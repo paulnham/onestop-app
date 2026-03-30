@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Events Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #17171a;
+    --surface2: #1e1e23;
+    --border: #2a2a32;
+    --accent: #7ee8a2;
+    --accent2: #5bc4f5;
+    --accent3: #f0c96e;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --danger: #f07070;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* LOGIN */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse at 30% 50%, #1a2a1a 0%, var(--bg) 60%);
+  }
+  .login-card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+  }
+  .logo-big {
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  .sheet-field { margin-bottom: 1.5rem; text-align: left; }
+  .sheet-field label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  .sheet-field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .sheet-field input:focus { border-color: var(--accent); }
+  .sheet-field .hint {
+    font-size: 0.66rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    line-height: 1.5;
+  }
+  .google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    background: #fff;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  }
+  .google-btn:hover { background: #f0f0f0; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.45); }
+  .google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .error-msg {
+    background: rgba(240,112,112,0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    font-size: 0.76rem;
+    margin-top: 1rem;
+    display: none;
+    text-align: left;
+    line-height: 1.5;
+  }
+  .privacy-note {
+    font-size: 0.66rem;
+    color: var(--muted);
+    margin-top: 1.25rem;
+    line-height: 1.6;
+  }
+
+  /* APP */
+  #app { display: none; }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.875rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .week-tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .week-tab {
+    padding: 0.28rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .week-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .week-tab.active { background: var(--accent); color: #0f0f11; border-color: var(--accent); font-weight: 500; }
+
+  .header-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .user-pill {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.22rem 0.7rem 0.22rem 0.22rem;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #0f0f11;
+    font-size: 0.62rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .btn-sm {
+    padding: 0.28rem 0.6rem;
+    font-size: 0.68rem;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.15s;
+  }
+  .btn-sm:hover { color: var(--text); border-color: var(--muted); }
+
+  .filter-bar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.55rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .filter-label {
+    font-size: 0.66rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .chips-wrap { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .chip {
+    padding: 0.22rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .chip:not(.active) { opacity: 0.32; filter: grayscale(0.5); }
+  .chip.active { opacity: 1; }
+
+  .content { padding: 1.25rem 1.5rem; max-width: 1400px; margin: 0 auto; }
+
+  .summary-bar { display: flex; gap: 0.65rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0.6rem 1rem;
+    flex: 1; min-width: 90px;
+  }
+  .stat .val {
+    font-family: 'Fraunces', serif; font-size: 1.5rem;
+    font-weight: 700; color: var(--accent); line-height: 1;
+  }
+  .stat .lbl {
+    font-size: 0.62rem; color: var(--muted);
+    margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  .day-section { margin-bottom: 1.75rem; }
+  .day-header {
+    display: flex; align-items: baseline; gap: 0.6rem;
+    margin-bottom: 0.55rem; padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-name { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--text); }
+  .day-date { font-size: 0.66rem; color: var(--muted); }
+  .day-count { margin-left: auto; font-size: 0.64rem; color: var(--muted); }
+
+  .events-grid { display: flex; flex-direction: column; gap: 0.32rem; }
+  .ecard {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0.6rem 0.85rem;
+    display: grid; grid-template-columns: 82px 1fr auto;
+    gap: 0.7rem; align-items: start;
+    border-left: 3px solid transparent;
+    animation: fi 0.22s ease both;
+    transition: background 0.12s;
+  }
+  @keyframes fi { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
+  .ecard:hover { background: var(--surface2); }
+  .ecard.daily { opacity: 0.6; }
+  .etime { font-size: 0.66rem; color: var(--muted); line-height: 1.5; padding-top: 2px; }
+  .etime .s { color: var(--text); font-weight: 500; }
+  .ebody { min-width: 0; }
+  .ewhat { font-size: 0.8rem; font-weight: 500; color: var(--text); margin-bottom: 0.18rem; line-height: 1.3; }
+  .ewhere { font-size: 0.66rem; color: var(--accent2); margin-bottom: 0.22rem; }
+  .epeople { display: flex; flex-wrap: wrap; gap: 0.22rem; }
+  .ptag {
+    font-size: 0.62rem; padding: 0.08rem 0.38rem;
+    border-radius: 4px; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+  }
+  .ptag.lead { background: rgba(126,232,162,0.08); border-color: rgba(126,232,162,0.25); color: var(--accent); }
+  .emeta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.22rem; flex-shrink: 0; }
+  .gbadge {
+    font-size: 0.58rem; padding: 0.1rem 0.42rem;
+    border-radius: 4px; font-weight: 500;
+    white-space: nowrap; border: 1px solid transparent;
+  }
+  .rbadges { display: flex; flex-wrap: wrap; gap: 0.18rem; justify-content: flex-end; }
+  .rbadge {
+    font-size: 0.58rem; padding: 0.08rem 0.32rem;
+    border-radius: 3px; border: 1px solid var(--border);
+    color: var(--muted); white-space: nowrap;
+  }
+  .rbadge.v { background: rgba(240,201,110,0.08); border-color: rgba(240,201,110,0.2); color: var(--accent3); }
+
+  .state-msg { text-align:center; padding:4rem 2rem; color:var(--muted); font-size:0.8rem; line-height:2; }
+  .state-msg .icon { font-size:2rem; margin-bottom:0.75rem; }
+  .spinner {
+    width:24px; height:24px;
+    border:2px solid var(--border); border-top-color:var(--accent);
+    border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 1rem;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  @media (max-width:600px) {
+    .ecard { grid-template-columns: 68px 1fr; }
+    .emeta { display:none; }
+    .content { padding:1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo-big">📋 Events Dashboard</div>
+    <p class="tagline">Sign in with your Acts2 Network Google account<br>to access your private weekly schedule.</p>
+
+    <div class="sheet-field">
+      <label>Spreadsheet ID</label>
+      <input type="text" id="sheet-id" placeholder="Paste your Spreadsheet ID here" />
+      <div class="hint">From your sheet URL: docs.google.com/spreadsheets/d/<strong style="color:var(--accent2)">THIS_PART</strong>/edit</div>
+    </div>
+
+    <button class="google-btn" onclick="startSignIn()">
+      <svg viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Sign in with Google
+    </button>
+
+    <div class="error-msg" id="error-msg"></div>
+    <p class="privacy-note">🔒 Only Acts2 Network org accounts can sign in.<br>Your sheet data is fetched directly — nothing is stored externally.</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">📋 Weekly Events</div>
+      <div class="week-tabs" id="week-tabs"></div>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">
+        <div class="avatar" id="avatar">?</div>
+        <span id="user-name">...</span>
+      </div>
+      <button class="btn-sm" onclick="refreshData()">↻ Refresh</button>
+      <button class="btn-sm" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Group:</span>
+    <div class="chips-wrap" id="group-chips"></div>
+  </div>
+
+  <div class="content">
+    <div class="summary-bar" id="summary-bar"></div>
+    <div id="events-container"></div>
+  </div>
+</div>
+
+<script>
+const CLIENT_ID = '1171622663-9gco4ghvgio41ju61usrr6jmsj5m2bfr.apps.googleusercontent.com';
+const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+
+let tokenClient  = null;
+let accessToken  = null;
+let sheetId      = '';
+let currentWeek  = null;
+let allEvents    = [];
+let weeklySheets = [];
+let activeGroups = new Set(['ALL']);
+
+// ── COLOR MAP ──────────────────────────────────────────────
+const GC = {
+  'all sv':      { bg:'#1a3a5c', bd:'#4a90d9', tx:'#7ec8f5' },
+  'sv intl':     { bg:'#1a3a2a', bd:'#4a9d6a', tx:'#7ee8a2' },
+  'fam 1':       { bg:'#2a1a3a', bd:'#8a5ad9', tx:'#c49af5' },
+  'fam 2':       { bg:'#3a2a1a', bd:'#d98a4a', tx:'#f5c47e' },
+  'fam 3':       { bg:'#3a1a1a', bd:'#d94a4a', tx:'#f57e7e' },
+  'sv youth':    { bg:'#3a1a2a', bd:'#d94a8a', tx:'#f57ebc' },
+  'sv college':  { bg:'#1a2a3a', bd:'#4a6ad9', tx:'#7e9af5' },
+  'all bros':    { bg:'#1a3a3a', bd:'#4ab8b8', tx:'#7ef0f0' },
+  'daily':       { bg:'#1e1e23', bd:'#3a3a4a', tx:'#6b6b80' },
+  'default':     { bg:'#1e1e23', bd:'#3a3a4a', tx:'#a0a0b0' },
+};
+
+function gc(g) {
+  if (!g) return GC.default;
+  const k = g.toLowerCase().replace(/\s*[▼▾⌄].*/,'').replace(/[-_]/g,' ').replace(/\s+/g,' ').trim();
+  for (const [key, val] of Object.entries(GC)) {
+    if (key === 'default') continue;
+    if (k === key || k.startsWith(key) || key.split(' ').every(w => k.includes(w))) return val;
+  }
+  return GC.default;
+}
+
+// ── AUTH ───────────────────────────────────────────────────
+function startSignIn() {
+  const sid = document.getElementById('sheet-id').value.trim();
+  if (!sid) { showErr('Please enter your Spreadsheet ID first.'); return; }
+  sheetId = sid;
+  hideErr();
+
+  if (!tokenClient) {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: onToken,
+      error_callback: e => showErr('Sign-in failed: ' + (e.message || e.type || 'unknown error')),
+    });
+  }
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
+}
+
+async function onToken(resp) {
+  if (resp.error) { showErr('Auth error: ' + resp.error); return; }
+  accessToken = resp.access_token;
+
+  // Fetch user info
+  try {
+    const u = await apiFetch('https://www.googleapis.com/oauth2/v3/userinfo');
+    document.getElementById('user-name').textContent = u.name || u.email || 'Signed in';
+    const av = document.getElementById('avatar');
+    if (u.picture) av.innerHTML = `<img src="${u.picture}" referrerpolicy="no-referrer">`;
+    else av.textContent = (u.name || u.email || '?')[0].toUpperCase();
+  } catch {}
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  showLoading('Connecting to sheet...');
+
+  try {
+    await loadSheets();
+  } catch(e) {
+    showErr('Could not load spreadsheet: ' + e.message);
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+}
+
+function signOut() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken, () => {});
+  accessToken = null; currentWeek = null; allEvents = []; weeklySheets = [];
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ── API ────────────────────────────────────────────────────
+async function apiFetch(url) {
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `HTTP ${r.status}`); }
+  return r.json();
+}
+
+async function sheetsGet(path) {
+  return apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}${path}`);
+}
+
+// ── SHEETS LIST ────────────────────────────────────────────
+async function loadSheets() {
+  const data = await sheetsGet('?fields=sheets.properties.title');
+  const all  = data.sheets.map(s => s.properties.title);
+  const pat  = /^\d{1,2}\/\d{1,2}\s*[-–]\s*\d{1,2}\/\d{1,2}/;
+  weeklySheets = all.filter(s => pat.test(s));
+  if (!weeklySheets.length) {
+    const skip = new Set(['Bulletin','Discussion','2026Roles','2026Sched','Rotations','SundayRotations','DTBreakfast','PassionEaster','Upcoming']);
+    weeklySheets = all.filter(s => !skip.has(s));
+  }
+  if (!weeklySheets.length) throw new Error('No weekly tabs found in this spreadsheet.');
+
+  renderWeekTabs();
+  await loadWeek(weeklySheets[weeklySheets.length - 1]);
+}
+
+// ── WEEK TABS ──────────────────────────────────────────────
+function renderWeekTabs() {
+  document.getElementById('week-tabs').innerHTML = weeklySheets
+    .map(w => `<button class="week-tab" data-week="${w}" onclick="loadWeek(this.dataset.week)">${w}</button>`)
+    .join('');
+}
+
+async function loadWeek(name) {
+  currentWeek = name;
+  document.querySelectorAll('.week-tab').forEach(t => t.classList.toggle('active', t.dataset.week === name));
+  showLoading('Loading ' + name + '…');
+  try {
+    const data = await sheetsGet('/values/' + encodeURIComponent(name));
+    parse(data.values || []);
+  } catch(e) {
+    evHTML(`<div class="state-msg"><div class="icon">⚠️</div>Failed to load: ${e.message}</div>`);
+  }
+}
+
+async function refreshData() { if (currentWeek) await loadWeek(currentWeek); }
+
+// ── PARSE ──────────────────────────────────────────────────
+function parse(rows) {
+  allEvents = [];
+  if (!rows.length) { evHTML('<div class="state-msg"><div class="icon">📭</div>No data.</div>'); return; }
+
+  // Find header row
+  let hi = rows.findIndex(r => r.some(c => /^(what|start)$/i.test((c||'').trim())));
+  if (hi === -1) hi = 0;
+  const H = (rows[hi] || []).map(c => (c||'').trim().toLowerCase());
+
+  const ci = (aliases) => { for (const a of aliases) { const i = H.findIndex(h => h.includes(a)); if (i!==-1) return i; } return -1; };
+  const C = {
+    start:     ci(['start'])     === -1 ? 2  : ci(['start']),
+    end:       ci(['end'])       === -1 ? 3  : ci(['end']),
+    what:      ci(['what'])      === -1 ? 4  : ci(['what']),
+    where:     ci(['where'])     === -1 ? 5  : ci(['where']),
+    incharge:  ci(['in charge','incharge']) === -1 ? 6 : ci(['in charge','incharge']),
+    helpers:   ci(['helper'])    === -1 ? 7  : ci(['helper']),
+    childcare: ci(['childcare']) === -1 ? 8  : ci(['childcare']),
+    tech:      ci(['tech'])      === -1 ? 9  : ci(['tech']),
+    food:      ci(['food'])      === -1 ? 10 : ci(['food']),
+    lastman:   ci(['last man'])  === -1 ? 11 : ci(['last man']),
+  };
+
+  const g = (r, i) => (i >= 0 && i < r.length) ? (r[i]||'').trim() : '';
+  const norm = s => s.replace(/\s*[▼▾⌄].*/,'').replace(/\s+/g,' ').trim();
+
+  let curDate = null, curDay = null;
+
+  for (let i = hi + 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.every(c => !c)) continue;
+    const c0 = (r[0]||'').trim(), c1 = (r[1]||'').trim();
+
+    // Date row
+    if (/^\d{1,2}\/\d{1,2}$/.test(c0) && /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/i.test(c1)) {
+      curDate = c0; curDay = c1; continue;
+    }
+    // DAILY header
+    if (c0.toUpperCase() === 'DAILY') { curDay = 'DAILY'; curDate = 'Daily'; continue; }
+
+    const start = g(r, C.start), what = g(r, C.what);
+    if (!what && !start) continue;
+
+    const grp = norm(c0 || c1);
+    allEvents.push({
+      date: curDate, day: curDay || 'Other',
+      group: grp, start, end: g(r, C.end),
+      what: what || '(no title)', where: g(r, C.where),
+      inCharge: g(r, C.incharge), helpers: g(r, C.helpers),
+      childcare: g(r, C.childcare), tech: g(r, C.tech),
+      food: g(r, C.food), lastMan: g(r, C.lastman),
+      isDaily: curDay === 'DAILY',
+    });
+  }
+
+  buildFilters();
+  renderEvents();
+}
+
+// ── FILTERS ────────────────────────────────────────────────
+function buildFilters() {
+  const groups = [...new Set(allEvents.map(e => e.group).filter(Boolean))].sort();
+  activeGroups = new Set(['ALL', ...groups]);
+
+  const wrap = document.getElementById('group-chips');
+  wrap.innerHTML = '';
+  [['ALL','ALL'], ...groups.map(g => [g,g])].forEach(([lbl, val]) => {
+    const c = gc(val);
+    const el = document.createElement('button');
+    el.className = 'chip active';
+    el.textContent = lbl;
+    el.dataset.group = val;
+    el.style.cssText = `background:${c.bg};border-color:${c.bd};color:${c.tx}`;
+    el.onclick = () => toggleGroup(val);
+    wrap.appendChild(el);
+  });
+}
+
+function toggleGroup(g) {
+  const chips = [...document.querySelectorAll('.chip')];
+  const vals  = chips.map(c => c.dataset.group);
+
+  if (g === 'ALL') {
+    if (activeGroups.has('ALL')) activeGroups.clear();
+    else vals.forEach(v => activeGroups.add(v));
+  } else {
+    if (activeGroups.has(g)) { activeGroups.delete(g); activeGroups.delete('ALL'); }
+    else {
+      activeGroups.add(g);
+      if (vals.filter(v => v !== 'ALL').every(v => activeGroups.has(v))) activeGroups.add('ALL');
+    }
+  }
+  chips.forEach(c => c.classList.toggle('active', activeGroups.has(c.dataset.group)));
+  renderEvents();
+}
+
+// ── RENDER ─────────────────────────────────────────────────
+function renderEvents() {
+  const showAll  = activeGroups.has('ALL');
+  const filtered = allEvents.filter(e => showAll || activeGroups.has(e.group) || e.isDaily);
+
+  if (!filtered.length) {
+    evHTML('<div class="state-msg"><div class="icon">🔍</div>No events match the filter.</div>');
+    renderStats([]); return;
+  }
+
+  const ORDER = ['DAILY','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Other'];
+  const byDay = {};
+  filtered.forEach(e => (byDay[e.day] = byDay[e.day]||[]).push(e));
+  const days = Object.keys(byDay).sort((a,b) => {
+    const ai = ORDER.findIndex(d => a.toUpperCase().startsWith(d.toUpperCase()));
+    const bi = ORDER.findIndex(d => b.toUpperCase().startsWith(d.toUpperCase()));
+    return (ai===-1?99:ai)-(bi===-1?99:bi);
+  });
+
+  evHTML(days.map(day => {
+    const evts = byDay[day];
+    const daily = day.toUpperCase() === 'DAILY';
+    const dl = (!daily && evts[0]?.date) ? ` · ${evts[0].date}` : '';
+    return `<div class="day-section">
+      <div class="day-header">
+        <span class="day-name">${daily ? '📌 Daily' : day}</span>
+        <span class="day-date">${daily ? 'Recurring' : dl}</span>
+        <span class="day-count">${evts.length} event${evts.length!==1?'s':''}</span>
+      </div>
+      <div class="events-grid">${evts.map(card).join('')}</div>
+    </div>`;
+  }).join(''));
+
+  renderStats(filtered);
+}
+
+function card(e) {
+  const c = gc(e.group);
+  const roles = [
+    e.childcare && `<span class="rbadge v">Childcare: ${e.childcare}</span>`,
+    e.tech      && `<span class="rbadge v">Tech: ${e.tech}</span>`,
+    e.food      && `<span class="rbadge v">Food: ${e.food}</span>`,
+    e.lastMan   && `<span class="rbadge v">Last Out: ${e.lastMan}</span>`,
+  ].filter(Boolean).join('');
+  const people = [
+    e.inCharge && `<span class="ptag lead">${e.inCharge}</span>`,
+    e.helpers  && `<span class="ptag">${e.helpers}</span>`,
+  ].filter(Boolean).join('');
+
+  return `<div class="ecard${e.isDaily?' daily':''}" style="border-left-color:${c.bd}">
+    <div class="etime"><div class="s">${e.start||'—'}</div><div>${e.end||''}</div></div>
+    <div class="ebody">
+      <div class="ewhat">${e.what}</div>
+      ${e.where?`<div class="ewhere">📍 ${e.where}</div>`:''}
+      ${people?`<div class="epeople">${people}</div>`:''}
+    </div>
+    <div class="emeta">
+      ${e.group?`<span class="gbadge" style="background:${c.bg};border-color:${c.bd};color:${c.tx}">${e.group}</span>`:''}
+      ${roles?`<div class="rbadges">${roles}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderStats(evts) {
+  const days    = new Set(evts.filter(e=>!e.isDaily).map(e=>e.day)).size;
+  const groups  = new Set(evts.map(e=>e.group).filter(Boolean)).size;
+  const roles   = evts.filter(e=>e.childcare||e.tech||e.food||e.lastMan).length;
+  document.getElementById('summary-bar').innerHTML = `
+    <div class="stat"><div class="val">${evts.length}</div><div class="lbl">Events</div></div>
+    <div class="stat"><div class="val">${days}</div><div class="lbl">Active Days</div></div>
+    <div class="stat"><div class="val">${groups}</div><div class="lbl">Groups</div></div>
+    <div class="stat"><div class="val">${roles}</div><div class="lbl">Role Assignments</div></div>`;
+}
+
+// ── UTILS ──────────────────────────────────────────────────
+const evHTML = h => document.getElementById('events-container').innerHTML = h;
+const showLoading = m => evHTML(`<div class="state-msg"><div class="spinner"></div>${m}</div>`);
+const showErr = m => { const el = document.getElementById('error-msg'); el.textContent = m; el.style.display = 'block'; };
+const hideErr = ()  => document.getElementById('error-msg').style.display = 'none';
+</script>
+</body>
+</html>
