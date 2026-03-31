@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Events Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root {
+  --bg:       #f7f6f3;
+  --bg2:      #efeee9;
+  --white:    #ffffff;
+  --border:   #e2e0d8;
+  --border2:  #d0cdc3;
+  --text:     #1a1916;
+  --text2:    #5a5850;
+  --text3:    #9a9890;
+  --accent:   #2d6a4f;
+  --accent-l: #e8f4ee;
+  --accent2:  #e07b39;
+  --accent2-l:#fdf0e6;
+  --blue:     #2563a8;
+  --blue-l:   #e8f0fb;
+  --red:      #c0392b;
+  --red-l:    #fdecea;
+  --radius:   12px;
+  --radius-sm:8px;
+  --shadow:   0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-md:0 2px 8px rgba(0,0,0,0.09), 0 8px 32px rgba(0,0,0,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LOGIN ─────────────────────────────────────────── */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(45,106,79,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(224,123,57,0.05) 0%, transparent 50%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.75rem 2.5rem;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.login-icon {
+  width: 56px; height: 56px;
+  background: var(--accent-l);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 1.25rem;
+}
+
+.login-card h1 {
+  font-family: 'Lora', serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.login-card .sub {
+  color: var(--text2);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.field { margin-bottom: 1.25rem; text-align: left; }
+
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  padding: 0.7rem 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+  background: var(--white);
+}
+
+.field .hint {
+  font-size: 0.72rem;
+  color: var(--text3);
+  margin-top: 0.35rem;
+  line-height: 1.5;
+}
+
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background: var(--white);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  transition: all 0.18s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.google-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
+.google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.err {
+  background: var(--red-l);
+  border: 1px solid rgba(192,57,43,0.2);
+  color: var(--red);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.875rem;
+  font-size: 0.8rem;
+  margin-top: 1rem;
+  display: none;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.privacy {
+  font-size: 0.72rem;
+  color: var(--text3);
+  margin-top: 1.25rem;
+  line-height: 1.6;
+}
+
+.privacy span { color: var(--accent); }
+
+/* ── APP ───────────────────────────────────────────── */
+#app { display: none; min-height: 100vh; }
+
+/* Header */
+.header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.header-left { display: flex; align-items: center; gap: 0.75rem; }
+
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: 'Lora', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.divider-v {
+  width: 1px; height: 20px;
+  background: var(--border2);
+  margin: 0 0.25rem;
+}
+
+.week-tabs { display: flex; gap: 0.25rem; }
+
+.week-tab {
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text3);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.week-tab:hover { background: var(--bg2); color: var(--text2); }
+.week-tab.active {
+  background: var(--accent-l);
+  color: var(--accent);
+  border-color: rgba(45,106,79,0.2);
+  font-weight: 600;
+}
+
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
+
+.user-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.2rem 0.65rem 0.2rem 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 0.65rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+}
+
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+
+.icon-btn:hover { background: var(--bg2); border-color: var(--border2); }
+
+/* Filter bar */
+.filter-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.chip:not(.active) { opacity: 0.38; }
+.chip.active { opacity: 1; }
+
+/* Main layout */
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 109px);
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 1rem;
+  position: sticky;
+  top: 109px;
+  height: calc(100vh - 109px);
+  overflow-y: auto;
+}
+
+.sidebar-section { margin-bottom: 1.5rem; }
+
+.sidebar-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem;
+  padding: 0 0.25rem;
+}
+
+.day-nav-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+.day-nav-item:hover { background: var(--bg); }
+.day-nav-item.active { background: var(--accent-l); color: var(--accent); }
+
+.day-nav-count {
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: var(--bg2);
+  color: var(--text3);
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+}
+
+.day-nav-item.active .day-nav-count {
+  background: rgba(45,106,79,0.15);
+  color: var(--accent);
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.stat-card {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 0.64rem;
+  color: var(--text3);
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+
+/* Main content */
+.main { padding: 1.5rem; overflow-y: auto; }
+
+/* Day sections */
+.day-section { margin-bottom: 2rem; scroll-margin-top: 120px; }
+
+.day-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-bottom: 0.875rem;
+  position: sticky;
+  top: 109px;
+  background: var(--bg);
+  z-index: 10;
+  padding: 0.5rem 0;
+  margin-left: -0.25rem;
+  margin-right: -0.25rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.day-pill {
+  background: var(--text);
+  color: var(--white);
+  font-family: 'Lora', serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  letter-spacing: 0.01em;
+}
+
+.day-pill.daily-pill {
+  background: var(--bg2);
+  color: var(--text3);
+}
+
+.day-date-label {
+  font-size: 0.78rem;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+.day-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.day-count-badge {
+  font-size: 0.7rem;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+/* Event cards - BIG card for featured/important events */
+.events-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* Row style (compact) */
+.erow {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 0.875rem;
+  align-items: center;
+  transition: all 0.15s;
+  border-left: 3px solid var(--border2);
+  animation: slideUp 0.2s ease both;
+  cursor: default;
+}
+
+.erow:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--border2);
+  transform: translateY(-1px);
+}
+
+/* Card style (expanded, for events with more data) */
+.ecard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.125rem;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 0.875rem;
+  align-items: start;
+  transition: all 0.15s;
+  border-left: 3px solid var(--border2);
+  animation: slideUp 0.2s ease both;
+  cursor: default;
+  box-shadow: var(--shadow);
+}
+
+.ecard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.etime {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.etime-start {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.etime-end {
+  font-size: 0.72rem;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+.ebody { min-width: 0; }
+
+.ewhat {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.15rem;
+  line-height: 1.3;
+}
+
+.erow .ewhat { font-size: 0.84rem; }
+
+.ewhere {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.74rem;
+  color: var(--blue);
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+.epeople { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.3rem; }
+
+.person {
+  display: inline-flex; align-items: center; gap: 0.22rem;
+  font-size: 0.72rem; font-weight: 500;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.person.lead {
+  background: var(--accent-l);
+  border-color: rgba(45,106,79,0.2);
+  color: var(--accent);
+}
+
+.emeta {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.gbadge {
+  font-size: 0.68rem; font-weight: 600;
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+}
+
+.roles { display: flex; flex-wrap: wrap; gap: 0.2rem; justify-content: flex-end; }
+
+.role-tag {
+  font-size: 0.65rem; font-weight: 500;
+  padding: 0.12rem 0.4rem;
+  border-radius: 6px;
+  background: var(--accent2-l);
+  color: var(--accent2);
+  border: 1px solid rgba(224,123,57,0.2);
+  white-space: nowrap;
+}
+
+/* Daily section special style */
+.daily-strip {
+  background: var(--bg2);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+}
+
+.daily-strip-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text3);
+  margin-bottom: 0.6rem;
+}
+
+.daily-items { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.daily-item {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.45rem 0.625rem;
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  animation: slideUp 0.2s ease both;
+}
+
+.daily-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text3);
+  flex-shrink: 0;
+}
+
+.daily-item .dt { font-weight: 600; color: var(--text); min-width: 60px; }
+.daily-item .dw { color: var(--text2); flex: 1; }
+.daily-item .dp { font-size: 0.72rem; color: var(--text3); }
+
+/* States */
+.state-msg {
+  text-align: center; padding: 4rem 2rem;
+  color: var(--text3); font-size: 0.875rem; line-height: 2;
+}
+
+.state-msg .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+.spinner {
+  width: 28px; height: 28px;
+  border: 2.5px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .erow, .ecard { grid-template-columns: 64px 1fr; }
+  .emeta { display: none; }
+  .main { padding: 1rem; }
+  .header { padding: 0 1rem; }
+  .week-tabs { display: none; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">📋</div>
+    <h1>Events Dashboard</h1>
+    <p class="sub">Sign in with your Acts2 Network account to view your weekly schedule.</p>
+
+    <div class="field">
+      <label>Spreadsheet ID</label>
+      <input type="text" id="sheet-id" placeholder="Paste your Spreadsheet ID" />
+      <div class="hint">From your sheet URL: spreadsheets/d/<strong style="color:var(--accent)">THIS_PART</strong>/edit</div>
+    </div>
+
+    <button class="google-btn" onclick="startSignIn()">
+      <svg viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="err" id="err"></div>
+    <p class="privacy">🔒 Only <span>Acts2 Network</span> accounts can sign in. Your data stays in your browser.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-mark">📋</div>
+      <div class="logo-text">Weekly Events</div>
+      <div class="divider-v"></div>
+      <div class="week-tabs" id="week-tabs"></div>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">
+        <div class="avatar" id="avatar">?</div>
+        <span id="user-name">...</span>
+      </div>
+      <button class="icon-btn" onclick="refreshData()" title="Refresh">↻</button>
+      <button class="icon-btn" onclick="signOut()" title="Sign out">→</button>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <span class="filter-label">Group</span>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">This Week</div>
+        <div id="day-nav"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Summary</div>
+        <div class="stats-grid" id="stats"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">All Sheets</div>
+        <div id="other-sheets-nav"></div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main" id="main">
+      <div class="state-msg"><div class="spinner"></div>Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLIENT_ID = '1171622663-9gco4ghvgio41ju61usrr6jmsj5m2bfr.apps.googleusercontent.com';
+const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+
+let tokenClient, accessToken, sheetId, currentWeek;
+let allEvents = [], weeklySheets = [], allSheets = [];
+let activeGroups = new Set(['ALL']);
+
+// ── GROUP COLORS ────────────────────────────────────────
+const GC = {
+  'all sv':     { bg:'#dbeafe', bd:'#93c5fd', tx:'#1d4ed8' },
+  'sv intl':    { bg:'#dcfce7', bd:'#86efac', tx:'#15803d' },
+  'fam 1':      { bg:'#ede9fe', bd:'#c4b5fd', tx:'#6d28d9' },
+  'fam 2':      { bg:'#fff7ed', bd:'#fdba74', tx:'#c2410c' },
+  'fam 3':      { bg:'#fee2e2', bd:'#fca5a5', tx:'#b91c1c' },
+  'sv youth':   { bg:'#fce7f3', bd:'#f9a8d4', tx:'#be185d' },
+  'sv college': { bg:'#e0f2fe', bd:'#7dd3fc', tx:'#0369a1' },
+  'all bros':   { bg:'#ccfbf1', bd:'#5eead4', tx:'#0f766e' },
+  'default':    { bg:'#f3f4f6', bd:'#d1d5db', tx:'#6b7280' },
+};
+
+function gc(g) {
+  if (!g) return GC.default;
+  const k = g.toLowerCase().replace(/\s*[▼▾⌄].*/,'').replace(/[-_]/g,' ').replace(/\s+/g,' ').trim();
+  for (const [key, val] of Object.entries(GC)) {
+    if (key === 'default') continue;
+    if (k === key || k.startsWith(key) || key.split(' ').every(w => k.includes(w))) return val;
+  }
+  return GC.default;
+}
+
+function leftColor(g) {
+  const c = gc(g);
+  return c.bd;
+}
+
+// ── AUTH ────────────────────────────────────────────────
+function startSignIn() {
+  const sid = document.getElementById('sheet-id').value.trim();
+  if (!sid) { showErr('Please enter your Spreadsheet ID first.'); return; }
+  sheetId = sid; hideErr();
+
+  if (!tokenClient) {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID, scope: SCOPES,
+      callback: onToken,
+      error_callback: e => showErr('Sign-in failed: ' + (e.message || e.type || 'unknown')),
+    });
+  }
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
+}
+
+async function onToken(resp) {
+  if (resp.error) { showErr('Auth error: ' + resp.error); return; }
+  accessToken = resp.access_token;
+
+  try {
+    const u = await apiFetch('https://www.googleapis.com/oauth2/v3/userinfo');
+    document.getElementById('user-name').textContent = u.given_name || u.name || u.email || 'You';
+    const av = document.getElementById('avatar');
+    if (u.picture) av.innerHTML = `<img src="${u.picture}" referrerpolicy="no-referrer">`;
+    else av.textContent = (u.name||u.email||'?')[0].toUpperCase();
+  } catch {}
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  setMain('<div class="state-msg"><div class="spinner"></div>Connecting…</div>');
+
+  try { await loadSheets(); }
+  catch(e) {
+    showErr('Could not load spreadsheet: ' + e.message);
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+}
+
+function signOut() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken, ()=>{});
+  accessToken = null; currentWeek = null; allEvents = []; weeklySheets = [];
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ── API ─────────────────────────────────────────────────
+async function apiFetch(url) {
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `HTTP ${r.status}`); }
+  return r.json();
+}
+
+const sheetsGet = path => apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}${path}`);
+
+// ── SHEETS ──────────────────────────────────────────────
+async function loadSheets() {
+  const data = await sheetsGet('?fields=sheets.properties.title');
+  allSheets  = data.sheets.map(s => s.properties.title);
+  const pat  = /^\d{1,2}\/\d{1,2}\s*[-–]\s*\d{1,2}\/\d{1,2}/;
+  weeklySheets = allSheets.filter(s => pat.test(s));
+  if (!weeklySheets.length) {
+    const skip = new Set(['Bulletin','Discussion','2026Roles','2026Sched','Rotations','SundayRotations','DTBreakfast','PassionEaster','Upcoming']);
+    weeklySheets = allSheets.filter(s => !skip.has(s));
+  }
+  if (!weeklySheets.length) throw new Error('No weekly tabs found.');
+  renderWeekTabs();
+  renderSheetsSidebar();
+  await loadWeek(weeklySheets[weeklySheets.length - 1]);
+}
+
+function renderWeekTabs() {
+  document.getElementById('week-tabs').innerHTML = weeklySheets
+    .map(w => `<button class="week-tab" data-week="${w}" onclick="loadWeek(this.dataset.week)">${w}</button>`)
+    .join('');
+}
+
+async function loadWeek(name) {
+  currentWeek = name;
+  document.querySelectorAll('.week-tab').forEach(t => t.classList.toggle('active', t.dataset.week === name));
+  document.querySelectorAll('#other-sheets-nav .day-nav-item').forEach(t => t.classList.remove('active'));
+  setMain('<div class="state-msg"><div class="spinner"></div>Loading ' + name + '…</div>');
+  try {
+    const d = await sheetsGet('/values/' + encodeURIComponent(name));
+    parse(d.values || []);
+  } catch(e) {
+    setMain(`<div class="state-msg"><div class="icon">⚠️</div>${e.message}</div>`);
+  }
+}
+
+async function refreshData() { if (currentWeek) await loadWeek(currentWeek); }
+
+// ── PARSE ───────────────────────────────────────────────
+function parse(rows) {
+  allEvents = [];
+  if (!rows.length) { setMain('<div class="state-msg"><div class="icon">📭</div>No data.</div>'); return; }
+
+  let hi = rows.findIndex(r => r.some(c => /^(what|start)$/i.test((c||'').trim())));
+  if (hi === -1) hi = 0;
+  const H = (rows[hi]||[]).map(c => (c||'').trim().toLowerCase());
+
+  const ci = (...aliases) => { for (const a of aliases) { const i = H.findIndex(h => h.includes(a)); if (i !== -1) return i; } return -1; };
+  const C = {
+    start:  ci('start') !== -1 ? ci('start') : 2,
+    end:    ci('end')   !== -1 ? ci('end')   : 3,
+    what:   ci('what')  !== -1 ? ci('what')  : 4,
+    where:  ci('where') !== -1 ? ci('where') : 5,
+    ic:     ci('in charge','incharge') !== -1 ? ci('in charge','incharge') : 6,
+    help:   ci('helper') !== -1 ? ci('helper') : 7,
+    cc:     ci('childcare') !== -1 ? ci('childcare') : 8,
+    tech:   ci('tech')  !== -1 ? ci('tech')  : 9,
+    food:   ci('food')  !== -1 ? ci('food')  : 10,
+    last:   ci('last man') !== -1 ? ci('last man') : 11,
+  };
+
+  const g = (r,i) => (i>=0&&i<r.length) ? (r[i]||'').trim() : '';
+  const norm = s => s.replace(/\s*[▼▾⌄].*/,'').replace(/\s+/g,' ').trim();
+
+  let curDate = null, curDay = null;
+
+  for (let i = hi+1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.every(c=>!c)) continue;
+    const c0=(r[0]||'').trim(), c1=(r[1]||'').trim();
+
+    if (/^\d{1,2}\/\d{1,2}$/.test(c0) && /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/i.test(c1)) {
+      curDate=c0; curDay=c1; continue;
+    }
+    if (c0.toUpperCase()==='DAILY') { curDay='DAILY'; curDate='Daily'; continue; }
+
+    const start=g(r,C.start), what=g(r,C.what);
+    if (!what && !start) continue;
+
+    const rawGrp = norm(c0||c1);
+    // Don't use times or invalid values as group names
+    const grp = isValidGroup(rawGrp) ? rawGrp : '';
+    const childcare=g(r,C.cc), tech=g(r,C.tech), food=g(r,C.food), lastMan=g(r,C.last);
+    const hasRoles = !!(childcare||tech||food||lastMan);
+
+    allEvents.push({
+      date:curDate, day:curDay||'Other', group:grp,
+      start, end:g(r,C.end), what:what||'(no title)',
+      where:g(r,C.where), inCharge:g(r,C.ic), helpers:g(r,C.help),
+      childcare, tech, food, lastMan, hasRoles,
+      isDaily: curDay==='DAILY',
+    });
+  }
+
+  buildFilters();
+  renderAll();
+}
+
+// ── FILTERS ─────────────────────────────────────────────
+function isValidGroup(g) {
+  if (!g) return false;
+  // Reject time-like strings (e.g. "11:30 AM", "5:00 PM")
+  if (/^\d{1,2}:\d{2}\s*(AM|PM)?$/i.test(g)) return false;
+  // Reject pure numbers or short codes that are clearly not groups
+  if (/^\d+$/.test(g)) return false;
+  // Reject anything that looks like a date
+  if (/^\d{1,2}\/\d{1,2}/.test(g)) return false;
+  // Must be at least 2 chars
+  if (g.length < 2) return false;
+  return true;
+}
+
+function buildFilters() {
+  const groups = [...new Set(allEvents.map(e=>e.group).filter(isValidGroup))].sort();
+  activeGroups = new Set(['ALL', ...groups]);
+
+  const wrap = document.getElementById('chips');
+  wrap.innerHTML = '';
+  [['ALL','ALL'], ...groups.map(g=>[g,g])].forEach(([lbl,val]) => {
+    const c = gc(val);
+    const el = document.createElement('button');
+    el.className = 'chip active';
+    el.textContent = lbl;
+    el.dataset.group = val;
+    el.style.cssText = `background:${c.bg};border-color:${c.bd};color:${c.tx}`;
+    el.onclick = () => toggleGroup(val);
+    wrap.appendChild(el);
+  });
+}
+
+function toggleGroup(g) {
+  const chips = [...document.querySelectorAll('.chip')];
+  const vals  = chips.map(c => c.dataset.group);
+  if (g==='ALL') {
+    if (activeGroups.has('ALL')) activeGroups.clear();
+    else vals.forEach(v => activeGroups.add(v));
+  } else {
+    if (activeGroups.has(g)) { activeGroups.delete(g); activeGroups.delete('ALL'); }
+    else {
+      activeGroups.add(g);
+      if (vals.filter(v=>v!=='ALL').every(v=>activeGroups.has(v))) activeGroups.add('ALL');
+    }
+  }
+  chips.forEach(c => c.classList.toggle('active', activeGroups.has(c.dataset.group)));
+  renderAll();
+}
+
+// ── RENDER ──────────────────────────────────────────────
+function renderAll() {
+  const showAll  = activeGroups.has('ALL');
+  const filtered = allEvents.filter(e => showAll || activeGroups.has(e.group) || e.isDaily);
+
+  if (!filtered.length) {
+    setMain('<div class="state-msg"><div class="icon">🔍</div>No events match the filter.</div>');
+    renderSidebar([]); return;
+  }
+
+  const ORDER = ['DAILY','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Other'];
+  const byDay = {};
+  filtered.forEach(e => (byDay[e.day]=byDay[e.day]||[]).push(e));
+  const days = Object.keys(byDay).sort((a,b)=>{
+    const ai=ORDER.findIndex(d=>a.toUpperCase().startsWith(d.toUpperCase()));
+    const bi=ORDER.findIndex(d=>b.toUpperCase().startsWith(d.toUpperCase()));
+    return (ai===-1?99:ai)-(bi===-1?99:bi);
+  });
+
+  let html = '';
+
+  days.forEach(day => {
+    const evts = byDay[day];
+    const daily = day.toUpperCase()==='DAILY';
+
+    if (daily) {
+      // Daily events as a compact strip
+      html += `<div class="daily-strip day-section" id="day-DAILY">
+        <div class="daily-strip-title">📌 Daily Recurring</div>
+        <div class="daily-items">${evts.map(dailyItem).join('')}</div>
+      </div>`;
+    } else {
+      const dl = evts[0]?.date ? evts[0].date : '';
+      html += `<div class="day-section" id="day-${day.replace(/\s/g,'-')}">
+        <div class="day-header">
+          <span class="day-pill">${day}</span>
+          ${dl ? `<span class="day-date-label">${dl}</span>` : ''}
+          <div class="day-line"></div>
+          <span class="day-count-badge">${evts.length} event${evts.length!==1?'s':''}</span>
+        </div>
+        <div class="events-grid">${evts.map(eventEl).join('')}</div>
+      </div>`;
+    }
+  });
+
+  setMain(html);
+  renderSidebar(filtered, days, byDay);
+}
+
+function dailyItem(e) {
+  return `<div class="daily-item">
+    <div class="daily-dot" style="background:${leftColor(e.group)}"></div>
+    <span class="dt">${e.start||'—'}</span>
+    <span class="dw">${e.what}</span>
+    ${e.where ? `<span class="dp">📍 ${e.where}</span>` : ''}
+    ${e.inCharge ? `<span class="dp">${e.inCharge}</span>` : ''}
+  </div>`;
+}
+
+function eventEl(e) {
+  const c    = gc(e.group);
+  const lc   = leftColor(e.group);
+  const rich = !!(e.where || e.helpers || e.hasRoles);
+  const cls  = rich ? 'ecard' : 'erow';
+
+  const roles = [
+    e.childcare && `<span class="role-tag">👶 ${e.childcare}</span>`,
+    e.tech      && `<span class="role-tag">💻 ${e.tech}</span>`,
+    e.food      && `<span class="role-tag">🍽 ${e.food}</span>`,
+    e.lastMan   && `<span class="role-tag">🔒 ${e.lastMan}</span>`,
+  ].filter(Boolean).join('');
+
+  const people = [
+    e.inCharge && `<span class="person lead">★ ${e.inCharge}</span>`,
+    e.helpers  && `<span class="person">${e.helpers}</span>`,
+  ].filter(Boolean).join('');
+
+  return `<div class="${cls}" style="border-left-color:${lc}">
+    <div class="etime">
+      <div class="etime-start">${e.start||'—'}</div>
+      ${e.end?`<div class="etime-end">${e.end}</div>`:''}
+    </div>
+    <div class="ebody">
+      <div class="ewhat">${e.what}</div>
+      ${e.where?`<div class="ewhere">📍 ${e.where}</div>`:''}
+      ${people?`<div class="epeople">${people}</div>`:''}
+    </div>
+    <div class="emeta">
+      ${e.group?`<span class="gbadge" style="background:${c.bg};border-color:${c.bd};color:${c.tx}">${e.group}</span>`:''}
+      ${roles?`<div class="roles">${roles}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderSheetsSidebar() {
+  const pat = /^\d{1,2}\/\d{1,2}\s*[-–]\s*\d{1,2}\/\d{1,2}/;
+  const otherSheets = allSheets.filter(s => !pat.test(s));
+
+  // Icons for known sheet names
+  const icons = {
+    'Bulletin': '📌', 'PassionEaster': '✝️', 'Upcoming': '📅',
+    'Rotations': '🔄', 'SundayRotations': '☀️', 'DTBreakfast': '🍳',
+    '2026Roles': '👥', '2026Sched': '🗓', 'Discussion': '💬',
+  };
+
+  const el = document.getElementById('other-sheets-nav');
+  if (!el || !otherSheets.length) return;
+
+  el.innerHTML = otherSheets.map(s => {
+    const icon = icons[s] || '📄';
+    return `<div class="day-nav-item" onclick="loadRawSheet('${s.replace(/'/g,"\\'")}')">
+      <span>${icon} ${s}</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadRawSheet(name) {
+  currentWeek = name;
+  // Mark all week tabs inactive, highlight other-sheet links
+  document.querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#other-sheets-nav .day-nav-item').forEach(t => {
+    t.classList.toggle('active', t.textContent.trim().endsWith(name) || t.textContent.includes(name));
+  });
+  setMain(`<div class="state-msg"><div class="spinner"></div>Loading ${name}…</div>`);
+  try {
+    const d = await sheetsGet('/values/' + encodeURIComponent(name));
+    renderRawTable(name, d.values || []);
+  } catch(e) {
+    setMain(`<div class="state-msg"><div class="icon">⚠️</div>${e.message}</div>`);
+  }
+}
+
+function renderRawTable(name, rows) {
+  if (!rows.length) { setMain('<div class="state-msg"><div class="icon">📭</div>No data.</div>'); return; }
+
+  // Find a reasonable header row (first non-empty row)
+  const headerRow = rows[0];
+  const dataRows  = rows.slice(1);
+
+  let html = `<div style="margin-bottom:1rem;">
+    <h2 style="font-family:'Lora',serif;font-size:1.2rem;font-weight:600;color:var(--text);margin-bottom:0.25rem;">${name}</h2>
+    <p style="font-size:0.78rem;color:var(--text3);">${dataRows.length} rows</p>
+  </div>
+  <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);box-shadow:var(--shadow);">
+    <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+      <thead>
+        <tr style="background:var(--bg2);border-bottom:1px solid var(--border);">
+          ${headerRow.map(h => `<th style="padding:0.6rem 0.875rem;text-align:left;font-weight:600;color:var(--text2);white-space:nowrap;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;">${h||''}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${dataRows.map((row, ri) => `
+          <tr style="border-bottom:1px solid var(--border);${ri%2===1?'background:var(--bg);':''}">
+            ${headerRow.map((_,ci) => `<td style="padding:0.55rem 0.875rem;color:var(--text);vertical-align:top;">${row[ci]||''}</td>`).join('')}
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  setMain(html);
+  // Clear sidebar day nav since this isn't a weekly view
+  document.getElementById('day-nav').innerHTML = `<div style="font-size:0.75rem;color:var(--text3);padding:0.25rem;">Viewing raw sheet data</div>`;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${dataRows.length}</div><div class="stat-lbl">Rows</div></div>
+    <div class="stat-card"><div class="stat-val">${headerRow.length}</div><div class="stat-lbl">Columns</div></div>`;
+}
+  // Day nav
+  const nav = document.getElementById('day-nav');
+  if (days && byDay) {
+    const ORDER = ['DAILY','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Other'];
+    nav.innerHTML = days.map(day => {
+      const daily = day.toUpperCase()==='DAILY';
+      const id    = `day-${day.replace(/\s/g,'-')}`;
+      const lbl   = daily ? '📌 Daily' : day;
+      const cnt   = (byDay[day]||[]).length;
+      return `<div class="day-nav-item" onclick="document.getElementById('${id}')?.scrollIntoView({behavior:'smooth'})">
+        <span>${lbl}</span>
+        <span class="day-nav-count">${cnt}</span>
+      </div>`;
+    }).join('');
+  } else {
+    nav.innerHTML = '';
+  }
+
+  // Stats
+  const days2   = new Set(filtered.filter(e=>!e.isDaily).map(e=>e.day)).size;
+  const groups  = new Set(filtered.map(e=>e.group).filter(Boolean)).size;
+  const roles   = filtered.filter(e=>e.hasRoles).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${filtered.length}</div><div class="stat-lbl">Events</div></div>
+    <div class="stat-card"><div class="stat-val">${days2}</div><div class="stat-lbl">Days</div></div>
+    <div class="stat-card"><div class="stat-val">${groups}</div><div class="stat-lbl">Groups</div></div>
+    <div class="stat-card"><div class="stat-val">${roles}</div><div class="stat-lbl">Roles</div></div>`;
+}
+
+// ── UTILS ───────────────────────────────────────────────
+const setMain  = h  => document.getElementById('main').innerHTML = h;
+const showErr  = m  => { const e=document.getElementById('err'); e.textContent=m; e.style.display='block'; };
+const hideErr  = () => document.getElementById('err').style.display='none';
+</script>
+</body>
+</html>
